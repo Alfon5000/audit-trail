@@ -1,0 +1,105 @@
+<script>
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { Head, Link } from "@inertiajs/vue3";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import DangerButton from "@/Components/DangerButton.vue";
+import hasPermission from "@/Utils/hasPermission";
+
+export default {
+  props: {
+    permissions: Object,
+  },
+  components: {
+    AuthenticatedLayout,
+    Head,
+    Link,
+    PrimaryButton,
+    DangerButton,
+  },
+  setup() {
+    const deletePermission = (id) => {
+      if (confirm("Are you sure you want to delete this permission?")) {
+        Inertia.delete(route("permissions.destroy", id));
+      }
+    };
+    return {
+      deletePermission,
+      hasPermission,
+    };
+  },
+};
+</script>
+
+<template>
+  <AuthenticatedLayout>
+    <Head title="Permissions" />
+    <template #header>
+      <h2 class="text-xl font-semibold leading-tight text-gray-800">
+        Permissions
+      </h2>
+    </template>
+    <div class="py-12">
+      <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="bg-white shadow-sm sm:rounded-lg">
+          <div class="p-6 bg-white border-b border-gray-200">
+            <div class="mb-6">
+              <Link
+                :href="route('permissions.create')"
+                v-show="hasPermission('create permission')"
+                ><PrimaryButton>Create</PrimaryButton>
+              </Link>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full table-auto">
+                <thead>
+                  <tr class="border-b border-gray-200 bg-gray-800 text-white">
+                    <th class="px-4 py-2 text-start">#</th>
+                    <th class="px-4 py-2 text-start">Name</th>
+                    <th class="px-4 py-2 text-start">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-if="permissions.length > 0"
+                    v-for="(permission, index) in permissions"
+                    :key="permission.id"
+                    class="border-b border-gray-200"
+                  >
+                    <td class="px-4 py-2">
+                      {{ ++index }}
+                    </td>
+                    <td class="px-4 py-2">
+                      {{ permission.name }}
+                    </td>
+                    <td class="px-4 py-2 flex justify-start items-center">
+                      <Link
+                        :href="route('permissions.edit', permission.id)"
+                        v-show="hasPermission('edit permission')"
+                      >
+                        <PrimaryButton class="me-1">Edit</PrimaryButton>
+                      </Link>
+                      <Link
+                        :href="route('permissions.destroy', permission.id)"
+                        method="delete"
+                        as="button"
+                        @click="deletePermission(permission.id)"
+                        v-show="hasPermission('delete permission')"
+                      >
+                        <DangerButton>Delete</DangerButton>
+                      </Link>
+                    </td>
+                  </tr>
+                  <tr v-else class="border-b border-gray-200">
+                    <td class="px-4 py-2 text-center text-red-500" colspan="7">
+                      No permission found
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </AuthenticatedLayout>
+</template>
